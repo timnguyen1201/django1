@@ -2,6 +2,7 @@ from django.utils import timezone
 import datetime
 from django.db import models
 from django.db.models import DEFERRED
+from django.contrib import admin
 
 
 # Define the models - database layout, with additional metadata
@@ -11,6 +12,11 @@ class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField("date published")
 
+    @admin.display(
+        boolean=True,
+        ordering="pub_date",
+        description="Published recently?",
+    )
     def __str__(self):
         return self.question_text
 
@@ -74,3 +80,8 @@ def save(self, *args, **kwargs):
     ):
         raise ValueError("Updating the value of creator isn't allowed")
     super().save(*args, **kwargs)
+
+
+def was_published_recently(self):
+    now = timezone.now()
+    return now - datetime.timedelta(days=1) <= self.pub_date <= now
